@@ -1,91 +1,719 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Study Together｜一起讀書</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#f7f7f2;--card:#fff;--ink:#29352f;--muted:#748078;--green:#b9d5c3;--deep:#567966;--blue:#dbe8f3;--peach:#f5e3d5;--border:#e7eae4}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
-button,input,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;background:var(--deep);color:white;font-weight:650}button.secondary{background:#eef2ed;color:var(--ink)}button:hover{filter:brightness(.97)}
-.wrap{max-width:1100px;margin:auto;padding:24px}.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800}.logo{width:42px;height:42px;border-radius:14px;background:var(--green);display:grid;place-items:center;font-size:22px}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav button{background:transparent;color:var(--muted)}.nav button.active{background:#e3eee5;color:var(--deep)}
-.grid{display:grid;grid-template-columns:1.4fr .9fr;gap:18px}.card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px;box-shadow:0 3px 18px rgba(35,50,40,.035)}.hero{background:linear-gradient(135deg,#e5efe7,#f4f3e8);padding:26px;border-radius:22px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:28px}.muted{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}.stat{background:#ffffffb8;padding:14px;border-radius:16px}.stat strong{display:block;font-size:23px;margin-top:6px}.heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.heading h2{font-size:18px;margin:0}.timer{text-align:center;padding:12px 0 18px}.time{font-size:64px;font-weight:800;letter-spacing:2px}.presets{display:flex;justify-content:center;gap:8px;margin:14px 0}.presets button{padding:9px 12px}.presets .chosen{background:#dcece0;color:var(--deep)}.timer-controls{display:flex;justify-content:center;gap:10px}.people{display:flex;flex-direction:column;gap:12px}.person{display:flex;align-items:center;gap:12px;padding:12px;background:#f8faf7;border-radius:16px}.avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--blue);font-size:20px}.person .info{flex:1}.person small{color:var(--muted)}.dot{width:9px;height:9px;background:#7eb18c;border-radius:50%;display:inline-block;margin-right:6px}.progress{height:8px;background:#edf0eb;border-radius:99px;overflow:hidden;margin-top:8px}.progress div{height:100%;background:var(--deep);border-radius:99px}.feed{display:flex;flex-direction:column;gap:12px}.post{padding:14px;border:1px solid var(--border);border-radius:16px}.posthead{display:flex;align-items:center;gap:10px}.posthead .avatar{width:34px;height:34px}.post p{margin:10px 0}.post small{color:var(--muted)}.formrow{display:flex;gap:8px;margin:12px 0}.formrow input,.formrow textarea,input{border:1px solid var(--border);border-radius:12px;padding:11px;background:white;color:var(--ink)}.formrow input{flex:1;min-width:0}.full{width:100%}.goal{display:flex;align-items:center;gap:10px}.goal input{width:80px}.notice{font-size:12px;color:var(--muted);margin-top:14px}.hidden{display:none}.bottom{margin-top:18px}.empty{color:var(--muted);text-align:center;padding:22px}
-@media(max-width:800px){.grid{grid-template-columns:1fr}.wrap{padding:15px}.header{align-items:flex-start;flex-direction:column}.time{font-size:54px}.stats{grid-template-columns:1fr 1fr 1fr}.card{padding:18px}}
+:root{
+ --bg:#f7f7f2;--card:#fff;--ink:#29352f;--muted:#748078;
+ --green:#b9d5c3;--deep:#567966;--blue:#dbe8f3;
+ --border:#e7eae4;--peach:#f5e3d5
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:system-ui,sans-serif;color:var(--ink)}
+button,input{font:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;background:var(--deep);color:white;font-weight:650}
+button.secondary{background:#eef2ed;color:var(--ink)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input{border:1px solid var(--border);border-radius:12px;padding:11px;background:white;color:var(--ink);width:100%;min-width:0}
+.wrap{max-width:1100px;margin:auto;padding:24px}
+.card{background:white;border:1px solid var(--border);border-radius:22px;padding:22px;box-shadow:0 3px 18px #23322808}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800}
+.logo{width:42px;height:42px;border-radius:14px;background:var(--green);display:grid;place-items:center;font-size:22px}
+.grid{display:grid;grid-template-columns:1.4fr .9fr;gap:18px}
+.hero{background:linear-gradient(135deg,#e5efe7,#f4f3e8);padding:26px;border-radius:22px;margin-bottom:18px}
+.hero h1{margin:0 0 8px;font-size:28px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.stat{background:#ffffffb8;padding:14px;border-radius:16px}
+.stat strong{display:block;font-size:23px;margin-top:6px}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.heading h2{font-size:18px;margin:0}
+.timer{text-align:center;padding:12px 0 18px}
+.time{font-size:64px;font-weight:800;letter-spacing:2px}
+.timer-controls,.presets{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.presets button{padding:9px 12px}
+.chosen{background:#dcece0!important;color:var(--deep)!important}
+.people,.feed{display:flex;flex-direction:column;gap:12px}
+.person{display:flex;align-items:center;gap:12px;padding:12px;background:#f8faf7;border-radius:16px}
+.avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--blue);font-size:21px;overflow:hidden;flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.info{flex:1;min-width:0}
+.info small,.post small{color:var(--muted)}
+.dot{width:9px;height:9px;background:#7eb18c;border-radius:50%;display:inline-block}
+.post{padding:14px;border:1px solid var(--border);border-radius:16px;overflow-wrap:anywhere}
+.posthead{display:flex;align-items:center;gap:10px}
+.posthead .avatar{width:34px;height:34px}
+.post p{margin:10px 0;white-space:pre-wrap}
+.formrow{display:flex;gap:8px;margin:12px 0}
+.formrow input{flex:1}
+.full{width:100%}
+.goal{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.goal input{width:85px}
+.notice{font-size:12px;color:var(--muted);margin-top:14px}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav button{background:transparent;color:var(--muted)}
+.nav button.active{background:#e3eee5;color:var(--deep)}
+.progress{height:8px;background:#edf0eb;border-radius:99px;overflow:hidden;margin-top:8px}
+.progress div{height:100%;background:var(--deep);border-radius:99px}
+.bottom{margin-top:18px}
+.empty{text-align:center;color:var(--muted);padding:20px}
+.auth-wrap{max-width:430px;margin:7vh auto}
+.auth-wrap h1{font-size:25px}
+.auth-wrap input{margin:7px 0}
+.auth-actions{display:flex;gap:8px;margin-top:12px}
+.auth-actions button{flex:1}
+.message{font-size:14px;color:#a15b45;min-height:22px;margin-top:10px}
+.profile-line{display:flex;align-items:center;gap:12px;margin:15px 0}
+.avatar-picker{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.avatar-option{font-size:23px;background:#f1f5f1;color:var(--ink);padding:8px;border:2px solid transparent}
+.avatar-option.selected{border-color:var(--deep)}
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.settings label{font-size:13px;color:var(--muted)}
+.settings input{margin-top:5px}
+@media(max-width:800px){
+ .grid{grid-template-columns:1fr}
+ .wrap{padding:15px}
+ .header{align-items:flex-start;flex-direction:column}
+ .time{font-size:54px}
+ .card{padding:18px}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<!-- 登入與註冊 -->
+<div id="authPage" class="wrap">
+ <div class="auth-wrap card">
+  <div class="brand"><div class="logo">📚</div>Study Together</div>
+  <h1>一起建立自習室</h1>
+  <p class="muted">使用帳號和密碼登入，和大家一起讀書。</p>
+  <input id="authUsername" placeholder="帳號（3～20 位英文字母、數字或底線）" maxlength="20" autocomplete="username">
+  <input id="authPassword" type="password" placeholder="密碼（至少 6 位）" autocomplete="current-password">
+  <div class="auth-actions">
+   <button id="loginBtn">登入</button>
+   <button id="registerBtn" class="secondary">註冊帳號</button>
+  </div>
+  <div id="authMessage" class="message"></div>
+  <p class="notice">請記住自己的帳號和密碼。此網站不需要填寫真實 Email。</p>
+ </div>
+</div>
+
+<!-- 主網站 -->
+<div id="appPage" class="wrap hidden">
 <header class="header">
-<div class="brand"><div class="logo">📚</div>Study Together</div>
-<nav class="nav"><button class="active" data-tab="home">自習室</button><button data-tab="log">我的紀錄</button></nav>
+ <div class="brand"><div class="logo">📚</div>Study Together</div>
+ <div class="nav">
+  <button class="active" data-tab="home">自習室</button>
+  <button data-tab="log">我的紀錄</button>
+  <button id="logoutBtn" class="secondary">登出</button>
+ </div>
 </header>
+
 <section class="hero">
-<h1>今天也一起努力吧。</h1>
-<div class="muted">不必獨自努力，這裡有人和你一起讀書。</div>
-<div class="stats">
-<div class="stat"><span class="muted">此刻自習中</span><strong id="online">12 人</strong></div>
-<div class="stat"><span class="muted">今日共同讀書</span><strong id="total">18 小時 42 分</strong></div>
-<div class="stat"><span class="muted">我的今日進度</span><strong id="myProgress">0 / 180 分</strong></div>
-</div>
+ <h1>今天也一起努力吧。</h1>
+ <div class="muted">不必獨自努力，這裡有人和你一起讀書。</div>
+ <div class="stats">
+  <div class="stat"><span class="muted">此刻自習中</span><strong id="online">0 人</strong></div>
+  <div class="stat"><span class="muted">今日共同讀書</span><strong id="total">0 分鐘</strong></div>
+  <div class="stat"><span class="muted">我的今日進度</span><strong id="myProgress">0 / 180 分</strong></div>
+ </div>
 </section>
+
 <div id="home">
-<div class="grid">
-<div class="card">
-<div class="heading"><h2>專注計時器</h2><span class="muted">讓時間專注在當下</span></div>
-<div class="timer"><div class="time" id="clock">25:00</div>
-<div class="presets"><button class="secondary chosen" data-min="25">25 分</button><button class="secondary" data-min="50">50 分</button><button class="secondary" data-min="60">60 分</button><button class="secondary" data-min="90">90 分</button></div>
-<div class="timer-controls"><button id="start">開始讀書</button><button class="secondary" id="reset">重設</button></div>
+ <div class="grid">
+  <div class="card">
+   <div class="heading"><h2>專注計時器</h2><span class="muted" id="phaseLabel">準備開始</span></div>
+   <div class="timer">
+    <div class="time" id="clock">25:00</div>
+    <div class="settings">
+     <label>讀書時間（分鐘）
+      <input id="studyDuration" type="number" min="1" max="300" value="25">
+     </label>
+     <label>休息時間（分鐘）
+      <input id="restDuration" type="number" min="1" max="60" value="5">
+     </label>
+    </div>
+    <div class="timer-controls">
+     <button id="startBtn">開始讀書</button>
+     <button id="resetBtn" class="secondary">重設</button>
+    </div>
+   </div>
+   <div class="goal">
+    <span>今日目標</span>
+    <input id="goalInput" type="number" min="1" value="180">
+    <span>分鐘</span>
+    <button id="setGoalBtn" class="secondary">設定</button>
+   </div>
+   <div class="notice">讀書結束後會自動進入休息，休息結束後自動開始下一輪。</div>
+  </div>
+
+  <div class="card">
+   <div class="heading"><h2>此刻一起讀書的人</h2><span class="muted">即時同步</span></div>
+   <div class="people" id="people"><div class="empty">載入中...</div></div>
+  </div>
+ </div>
+
+ <div class="grid bottom">
+  <div class="card">
+   <div class="heading"><h2>個人資料</h2></div>
+   <div class="profile-line">
+    <div class="avatar" id="myAvatar">📖</div>
+    <div><strong id="myName">讀者</strong><br><small class="muted">我的帳號</small></div>
+   </div>
+   <div class="avatar-picker" id="avatarPicker"></div>
+   <label class="muted">上傳自己的頭貼</label>
+   <input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp">
+   <div class="notice">建議使用 2MB 以下的圖片。</div>
+  </div>
+
+  <div class="card">
+   <div class="heading"><h2>讀書回報</h2></div>
+   <div class="formrow"><input id="subject" placeholder="今天讀了什麼？"></div>
+   <div class="formrow"><input id="note" placeholder="完成了什麼 / 給自己的話"></div>
+   <button class="full" id="postBtn">分享讀書回報</button>
+  </div>
+ </div>
+
+ <div class="card bottom">
+  <div class="heading"><h2>大家的讀書日常</h2></div>
+  <div class="feed" id="feed"><div class="empty">載入中...</div></div>
+ </div>
 </div>
-<div class="goal"><span>今日目標</span><input id="goalInput" type="number" min="1" value="180"><span>分鐘</span><button class="secondary" id="setGoal">設定</button></div>
-<div class="notice">計時器運作時，請保持此頁面開啟。原型暫不支援跨裝置同步。</div>
-</div>
-<div class="card">
-<div class="heading"><h2>此刻一起讀書的人</h2><span class="muted">陪伴感 · 不排名</span></div>
-<div class="people" id="people"></div>
-</div>
-</div>
-<div class="grid bottom">
-<div class="card">
-<div class="heading"><h2>讀書回報</h2><span class="muted">記下今天的小進步</span></div>
-<div class="formrow"><input id="nickname" placeholder="你的暱稱" value="小讀者"></div>
-<div class="formrow"><input id="subject" placeholder="今天讀了什麼？例如：微積分第三章"></div>
-<div class="formrow"><input id="note" placeholder="完成了什麼 / 給自己的話"></div>
-<button class="full" id="postBtn">分享讀書回報</button>
-</div>
-<div class="card">
-<div class="heading"><h2>大家的讀書日常</h2></div>
-<div class="feed" id="feed"></div>
-</div>
-</div>
-</div>
+
 <div id="log" class="hidden">
-<div class="card">
-<div class="heading"><h2>我的讀書紀錄</h2></div>
-<div class="stats"><div class="stat"><span class="muted">今日累積</span><strong id="logMinutes">0 分鐘</strong></div><div class="stat"><span class="muted">今日目標</span><strong id="logGoal">180 分鐘</strong></div><div class="stat"><span class="muted">目標進度</span><strong id="logPercent">0%</strong></div></div>
-<div class="progress"><div id="logBar" style="width:0%"></div></div>
-<p class="muted" style="margin-top:20px">紀錄只保存在目前這個瀏覽器。清除瀏覽器資料可能會使紀錄消失。</p>
+ <div class="card">
+  <div class="heading"><h2>我的讀書紀錄</h2></div>
+  <div class="stats">
+   <div class="stat"><span class="muted">今日累積</span><strong id="logMinutes">0 分鐘</strong></div>
+   <div class="stat"><span class="muted">今日目標</span><strong id="logGoal">180 分鐘</strong></div>
+   <div class="stat"><span class="muted">目標進度</span><strong id="logPercent">0%</strong></div>
+  </div>
+  <div class="progress"><div id="logBar" style="width:0%"></div></div>
+  <h3>最近的讀書紀錄</h3>
+  <div id="sessionList"></div>
+ </div>
 </div>
 </div>
-</div>
+
 <script>
-const demoPeople=[["🦊","小狐狸","正在讀：英文單字"],["🐼","熊貓同學","正在讀：統計學"],["🌱","芽芽","正在讀：生物"],["🐈","貓咪讀者","正在讀：歷史"],["☁️","雲朵","正在讀：寫作"]];
-const initialPosts=[{name:"芽芽",emoji:"🌱",subject:"生物｜細胞章節",note:"完成了兩頁筆記整理，慢慢來也很好。",time:"剛剛"},{name:"熊貓同學",emoji:"🐼",subject:"統計學｜複習",note:"今天把上週的題目重新做了一遍。",time:"12 分鐘前"},{name:"小狐狸",emoji:"🦊",subject:"英文單字",note:"又記住了一些新單字，繼續努力。",time:"28 分鐘前"}];
-let seconds=1500, chosen=25, running=false, interval=null;
-let studyMinutes=Number(localStorage.studyMinutes||0), goal=Number(localStorage.studyGoal||180), posts=JSON.parse(localStorage.studyPosts||"null")||initialPosts;
-const clock=document.getElementById("clock");
-function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
-function renderPeople(){document.getElementById("people").innerHTML=demoPeople.map(p=>`<div class="person"><div class="avatar">${p[0]}</div><div class="info"><strong>${p[1]}</strong><br><small>${p[2]}</small></div><span><i class="dot"></i></span></div>`).join("")}
-function renderPosts(){document.getElementById("feed").innerHTML=posts.map(p=>`<div class="post"><div class="posthead"><div class="avatar">${p.emoji||"📖"}</div><div><strong>${escapeHtml(p.name)}</strong><br><small>${p.time||"剛剛"}</small></div></div><p><strong>${escapeHtml(p.subject)}</strong></p><p>${escapeHtml(p.note)}</p></div>`).join("")}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function updateStats(){document.getElementById("myProgress").textContent=`${studyMinutes} / ${goal} 分`;document.getElementById("logMinutes").textContent=studyMinutes+" 分鐘";document.getElementById("logGoal").textContent=goal+" 分鐘";let pct=Math.min(100,Math.round(studyMinutes/goal*100));document.getElementById("logPercent").textContent=pct+"%";document.getElementById("logBar").style.width=pct+"%";document.getElementById("goalInput").value=goal}
-function stopTimer(completed=false){running=false;clearInterval(interval);interval=null;document.getElementById("start").textContent="開始讀書";if(completed){studyMinutes+=chosen;localStorage.studyMinutes=studyMinutes;updateStats();alert("完成這段專注時間！讀書時間已記錄。")}}
-document.getElementById("start").onclick=()=>{if(running){stopTimer();return}running=true;document.getElementById("start").textContent="暫停";interval=setInterval(()=>{seconds--;clock.textContent=fmt(seconds);if(seconds<=0){stopTimer(true);seconds=chosen*60;clock.textContent=fmt(seconds)}},1000)};
-document.getElementById("reset").onclick=()=>{stopTimer();seconds=chosen*60;clock.textContent=fmt(seconds)};
-document.querySelectorAll("[data-min]").forEach(b=>b.onclick=()=>{if(running)return;document.querySelectorAll("[data-min]").forEach(x=>x.classList.remove("chosen"));b.classList.add("chosen");chosen=Number(b.dataset.min);seconds=chosen*60;clock.textContent=fmt(seconds)});
-document.getElementById("setGoal").onclick=()=>{let g=Math.max(1,Number(document.getElementById("goalInput").value)||180);goal=g;localStorage.studyGoal=goal;updateStats()};
-document.getElementById("postBtn").onclick=()=>{let name=document.getElementById("nickname").value.trim()||"匿名讀者",subject=document.getElementById("subject").value.trim(),note=document.getElementById("note").value.trim();if(!subject||!note){alert("請填寫讀書內容和回報。");return}posts.unshift({name,emoji:"📖",subject,note,time:"剛剛"});localStorage.studyPosts=JSON.stringify(posts);renderPosts();document.getElementById("subject").value="";document.getElementById("note").value=""};
-document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("home").classList.toggle("hidden",b.dataset.tab!=="home");document.getElementById("log").classList.toggle("hidden",b.dataset.tab!=="log")});
-renderPeople();renderPosts();updateStats();
+const SUPABASE_URL = "https://brcgvkwqjbnxopgzgdpt.supabase.co";
+const SUPABASE_KEY = "sb_publishable_NEzZkcZvfd5B6EsUafQjfA";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let profile = null;
+let timer = null;
+let running = false;
+let phase = "study";
+let secondsLeft = 25 * 60;
+let phaseStartedAt = null;
+let dailyMinutes = 0;
+let goal = 180;
+let refreshTimer = null;
+
+const emojis = ["📖","🐱","🐼","🦊","🐰","🐻","🐸","🐧","🌱","🌸","☁️","⭐","🍀","🦋","🐣","🍮"];
+
+const $ = id => document.getElementById(id);
+
+function escapeHtml(value){
+ return String(value ?? "").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+function avatarHTML(value){
+ if(value && value.startsWith("http")){
+  return `<img src="${escapeHtml(value)}" alt="頭貼">`;
+ }
+ return escapeHtml(value || "📖");
+}
+
+function formatTime(seconds){
+ return String(Math.floor(seconds/60)).padStart(2,"0")+":"+
+        String(seconds%60).padStart(2,"0");
+}
+
+function todayStart(){
+ const d = new Date();
+ d.setHours(0,0,0,0);
+ return d.toISOString();
+}
+
+function showMessage(message){
+ $("authMessage").textContent = message;
+}
+
+function usernameEmail(username){
+ return username.toLowerCase() + "@study-together.invalid";
+}
+
+async function register(){
+ const username = $("authUsername").value.trim().toLowerCase();
+ const password = $("authPassword").value;
+
+ if(!/^[a-z0-9_]{3,20}$/.test(username)){
+  showMessage("帳號需為 3～20 位英文字母、數字或底線。");
+  return;
+ }
+ if(password.length < 6){
+  showMessage("密碼至少需要 6 位。");
+  return;
+ }
+
+ showMessage("正在建立帳號...");
+
+ const {data,error} = await db.auth.signUp({
+  email: usernameEmail(username),
+  password,
+  options:{data:{username}}
+ });
+
+ if(error){
+  showMessage("註冊失敗：" + error.message);
+  return;
+ }
+
+ if(data.session){
+  currentUser = data.user;
+  await enterApp();
+ }else{
+  showMessage("帳號已送出註冊。請確認 Supabase 已關閉 Email 確認功能，再重新登入。");
+ }
+}
+
+async function login(){
+ const username = $("authUsername").value.trim().toLowerCase();
+ const password = $("authPassword").value;
+
+ if(!/^[a-z0-9_]{3,20}$/.test(username)){
+  showMessage("請輸入正確的帳號格式。");
+  return;
+ }
+ if(!password){
+  showMessage("請輸入密碼。");
+  return;
+ }
+
+ showMessage("登入中...");
+
+ const {data,error} = await db.auth.signInWithPassword({
+  email:usernameEmail(username),
+  password
+ });
+
+ if(error){
+  showMessage("登入失敗，請確認帳號和密碼。");
+  return;
+ }
+
+ currentUser = data.user;
+ await enterApp();
+}
+
+$("registerBtn").onclick = register;
+$("loginBtn").onclick = login;
+$("authPassword").addEventListener("keydown",e=>{
+ if(e.key==="Enter") login();
+});
+
+async function enterApp(){
+ $("authPage").classList.add("hidden");
+ $("appPage").classList.remove("hidden");
+
+ const {data,error} = await db.from("profiles")
+  .select("*").eq("id",currentUser.id).single();
+
+ if(error){
+  alert("讀取個人資料失敗：" + error.message);
+  return;
+ }
+
+ profile = data;
+ $("myName").textContent = profile.username;
+ renderMyAvatar();
+ renderAvatarPicker();
+
+ await loadDailyData();
+ await refreshCommunity();
+ await setStatus("offline");
+
+ if(refreshTimer) clearInterval(refreshTimer);
+ refreshTimer = setInterval(refreshCommunity,10000);
+}
+
+async function logout(){
+ clearInterval(timer);
+ clearInterval(refreshTimer);
+ running = false;
+ await setStatus("offline");
+ await db.auth.signOut();
+ currentUser = null;
+ profile = null;
+ $("appPage").classList.add("hidden");
+ $("authPage").classList.remove("hidden");
+}
+
+$("logoutBtn").onclick = logout;
+
+function renderMyAvatar(){
+ $("myAvatar").innerHTML = avatarHTML(profile.avatar_url);
+}
+
+function renderAvatarPicker(){
+ $("avatarPicker").innerHTML = emojis.map(e=>
+  `<button class="avatar-option ${profile.avatar_url===e?"selected":""}" data-avatar="${e}">${e}</button>`
+ ).join("");
+
+ document.querySelectorAll("[data-avatar]").forEach(btn=>{
+  btn.onclick=()=>saveAvatar(btn.dataset.avatar);
+ });
+}
+
+async function saveAvatar(value){
+ const {error} = await db.from("profiles")
+  .update({avatar_url:value}).eq("id",currentUser.id);
+
+ if(error){alert("頭貼更新失敗："+error.message);return;}
+ profile.avatar_url=value;
+ renderMyAvatar();
+ renderAvatarPicker();
+ await refreshCommunity();
+}
+
+$("avatarFile").onchange = async e=>{
+ const file=e.target.files[0];
+ if(!file)return;
+
+ if(file.size>2*1024*1024){
+  alert("圖片請小於 2MB。");
+  e.target.value="";
+  return;
+ }
+
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+  alert("請使用 JPG、PNG 或 WebP 圖片。");
+  e.target.value="";
+  return;
+ }
+
+ const ext=file.name.split(".").pop().toLowerCase();
+ const path=currentUser.id+"/"+Date.now()+"."+ext;
+
+ const {error:uploadError}=await db.storage.from("avatars")
+  .upload(path,file,{upsert:true,contentType:file.type});
+
+ if(uploadError){
+  alert("圖片上傳失敗："+uploadError.message);
+  return;
+ }
+
+ const {data}=db.storage.from("avatars").getPublicUrl(path);
+ await saveAvatar(data.publicUrl);
+ e.target.value="";
+};
+
+async function setStatus(status){
+ if(!currentUser)return;
+
+ const endsAt = status==="offline" ? null :
+  new Date(Date.now()+secondsLeft*1000).toISOString();
+
+ const {error}=await db.from("user_status").upsert({
+  user_id:currentUser.id,
+  status,
+  phase_ends_at:endsAt,
+  updated_at:new Date().toISOString()
+ });
+
+ if(error) console.error("狀態更新失敗",error);
+}
+
+async function loadDailyData(){
+ const {data,error}=await db.from("study_sessions")
+  .select("*")
+  .eq("user_id",currentUser.id)
+  .gte("started_at",todayStart())
+  .order("started_at",{ascending:false});
+
+ if(error){console.error(error);return;}
+
+ dailyMinutes=data.reduce((sum,s)=>sum+Number(s.duration_minutes||0),0);
+ updateStats();
+ renderSessions(data);
+}
+
+function updateStats(){
+ $("myProgress").textContent=`${dailyMinutes} / ${goal} 分`;
+ $("logMinutes").textContent=dailyMinutes+" 分鐘";
+ $("logGoal").textContent=goal+" 分鐘";
+ const pct=Math.min(100,Math.round(dailyMinutes/goal*100));
+ $("logPercent").textContent=pct+"%";
+ $("logBar").style.width=pct+"%";
+ $("goalInput").value=goal;
+}
+
+function renderSessions(sessions){
+ if(!sessions.length){
+  $("sessionList").innerHTML='<div class="empty">今天還沒有讀書紀錄，開始第一輪吧！</div>';
+  return;
+ }
+
+ $("sessionList").innerHTML=sessions.map(s=>
+  `<div class="person">
+   <div class="avatar">📚</div>
+   <div class="info">
+    <strong>${Number(s.duration_minutes)} 分鐘</strong><br>
+    <small>${new Date(s.started_at).toLocaleString("zh-TW")}</small>
+   </div>
+  </div>`
+ ).join("");
+}
+
+$("setGoalBtn").onclick=()=>{
+ const value=Number($("goalInput").value);
+ if(!Number.isFinite(value)||value<1){alert("請輸入正確目標。");return;}
+ goal=value;
+ localStorage.setItem("studyGoal",goal);
+ updateStats();
+};
+
+goal=Number(localStorage.getItem("studyGoal"))||180;
+
+function setClock(){
+ $("clock").textContent=formatTime(secondsLeft);
+ $("phaseLabel").textContent=phase==="study"?"📚 專注讀書中":"☕ 休息時間";
+}
+
+function getDuration(){
+ const id=phase==="study"?"studyDuration":"restDuration";
+ const value=Number($(id).value);
+ return Math.max(1,Math.min(300,value||25));
+}
+
+async function startPhase(nextPhase){
+ phase=nextPhase;
+ secondsLeft=getDuration()*60;
+ phaseStartedAt=new Date().toISOString();
+ setClock();
+ await setStatus(phase==="study"?"studying":"resting");
+}
+
+async function completeStudy(){
+ const endedAt=new Date().toISOString();
+ const duration=getDuration();
+
+ const {error}=await db.from("study_sessions").insert({
+  user_id:currentUser.id,
+  started_at:phaseStartedAt || new Date(Date.now()-duration*60000).toISOString(),
+  ended_at:endedAt,
+  duration_minutes:duration
+ });
+
+ if(error){
+  console.error(error);
+  alert("讀書紀錄儲存失敗："+error.message);
+ }else{
+  dailyMinutes+=duration;
+  updateStats();
+  await loadDailyData();
+ }
+}
+
+async function finishPhase(){
+ if(phase==="study"){
+  await completeStudy();
+  await startPhase("rest");
+ }else{
+  await startPhase("study");
+ }
+}
+
+$("startBtn").onclick=async()=>{
+ if(running){
+  clearInterval(timer);
+  running=false;
+  $("startBtn").textContent="繼續";
+  await setStatus("offline");
+  return;
+ }
+
+ if(!phaseStartedAt) phaseStartedAt=new Date().toISOString();
+
+ running=true;
+ $("startBtn").textContent="暫停";
+ await setStatus(phase==="study"?"studying":"resting");
+
+ timer=setInterval(async()=>{
+  secondsLeft--;
+  setClock();
+
+  if(secondsLeft<=0){
+   clearInterval(timer);
+   await finishPhase();
+   if(running) startCountdown();
+  }
+ },1000);
+};
+
+function startCountdown(){
+ if(!running)return;
+ clearInterval(timer);
+ timer=setInterval(async()=>{
+  secondsLeft--;
+  setClock();
+  if(secondsLeft<=0){
+   clearInterval(timer);
+   await finishPhase();
+   if(running) startCountdown();
+  }
+ },1000);
+}
+
+$("resetBtn").onclick=async()=>{
+ clearInterval(timer);
+ running=false;
+ phase="study";
+ secondsLeft=getDuration()*60;
+ phaseStartedAt=null;
+ $("startBtn").textContent="開始讀書";
+ setClock();
+ await setStatus("offline");
+};
+
+$("studyDuration").onchange=()=>{
+ if(!running&&phase==="study"&&!phaseStartedAt){
+  secondsLeft=getDuration()*60;
+  setClock();
+ }
+};
+$("restDuration").onchange=()=>{};
+
+async function refreshCommunity(){
+ if(!currentUser)return;
+
+ const [{data:statuses},{data:profiles},{data:sessions}] = await Promise.all([
+  db.from("user_status").select("*"),
+  db.from("profiles").select("*"),
+  db.from("study_sessions").select("duration_minutes").gte("started_at",todayStart())
+ ]);
+
+ const profileMap={};
+ (profiles||[]).forEach(p=>profileMap[p.id]=p);
+
+ const active=(statuses||[]).filter(s=>
+  s.status==="studying"||s.status==="resting"
+ );
+
+ $("online").textContent=active.filter(s=>s.status==="studying").length+" 人";
+
+ const total=(sessions||[]).reduce((sum,s)=>sum+Number(s.duration_minutes||0),0);
+ $("total").textContent=total+" 分鐘";
+
+ if(!active.length){
+  $("people").innerHTML='<div class="empty">目前還沒有人開始讀書，成為第一位吧！</div>';
+ }else{
+  $("people").innerHTML=active.map(s=>{
+   const p=profileMap[s.user_id];
+   if(!p)return "";
+   const studying=s.status==="studying";
+   return `<div class="person">
+    <div class="avatar">${avatarHTML(p.avatar_url)}</div>
+    <div class="info">
+     <strong>${escapeHtml(p.username)}</strong><br>
+     <small>${studying?"📚 正在讀書":"☕ 正在休息"}</small>
+    </div>
+    <span class="dot"></span>
+   </div>`;
+  }).join("");
+ }
+
+ await loadPosts();
+}
+
+async function loadPosts(){
+ const {data,error}=await db.from("study_posts")
+  .select("*").order("created_at",{ascending:false}).limit(30);
+
+ if(error){console.error(error);return;}
+
+ const ids=[...new Set((data||[]).map(p=>p.user_id))];
+ let profiles=[];
+
+ if(ids.length){
+  const result=await db.from("profiles").select("*").in("id",ids);
+  profiles=result.data||[];
+ }
+
+ const map={};
+ profiles.forEach(p=>map[p.id]=p);
+
+ if(!data||!data.length){
+  $("feed").innerHTML='<div class="empty">還沒有人分享讀書日常。</div>';
+  return;
+ }
+
+ $("feed").innerHTML=data.map(p=>{
+  const user=map[p.user_id]||{};
+  const time=new Date(p.created_at).toLocaleString("zh-TW");
+  return `<div class="post">
+   <div class="posthead">
+    <div class="avatar">${avatarHTML(user.avatar_url)}</div>
+    <div><strong>${escapeHtml(user.username||"讀者")}</strong><br><small>${time}</small></div>
+   </div>
+   <p><strong>${escapeHtml(p.subject)}</strong></p>
+   <p>${escapeHtml(p.note)}</p>
+  </div>`;
+ }).join("");
+}
+
+$("postBtn").onclick=async()=>{
+ const subject=$("subject").value.trim();
+ const note=$("note").value.trim();
+
+ if(!subject||!note){
+  alert("請填寫讀書內容和回報。");
+  return;
+ }
+
+ const {error}=await db.from("study_posts").insert({
+  user_id:currentUser.id,subject,note
+ });
+
+ if(error){
+  alert("回報失敗："+error.message);
+  return;
+ }
+
+ $("subject").value="";
+ $("note").value="";
+ await loadPosts();
+};
+
+document.querySelectorAll("[data-tab]").forEach(btn=>{
+ btn.onclick=()=>{
+  document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");
+  $("home").classList.toggle("hidden",btn.dataset.tab!=="home");
+  $("log").classList.toggle("hidden",btn.dataset.tab!=="log");
+ };
+});
+
+async function initialize(){
+ const {data}=await db.auth.getSession();
+ if(data.session){
+  currentUser=data.session.user;
+  await enterApp();
+ }
+}
+
+initialize();
 </script>
 </body>
 </html>
