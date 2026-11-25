@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Together｜一起讀書</title>
+<style>
+:root{--bg:#f7f7f2;--card:#fff;--ink:#29352f;--muted:#748078;--green:#b9d5c3;--deep:#567966;--blue:#dbe8f3;--peach:#f5e3d5;--border:#e7eae4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;background:var(--deep);color:white;font-weight:650}button.secondary{background:#eef2ed;color:var(--ink)}button:hover{filter:brightness(.97)}
+.wrap{max-width:1100px;margin:auto;padding:24px}.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800}.logo{width:42px;height:42px;border-radius:14px;background:var(--green);display:grid;place-items:center;font-size:22px}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav button{background:transparent;color:var(--muted)}.nav button.active{background:#e3eee5;color:var(--deep)}
+.grid{display:grid;grid-template-columns:1.4fr .9fr;gap:18px}.card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px;box-shadow:0 3px 18px rgba(35,50,40,.035)}.hero{background:linear-gradient(135deg,#e5efe7,#f4f3e8);padding:26px;border-radius:22px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:28px}.muted{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}.stat{background:#ffffffb8;padding:14px;border-radius:16px}.stat strong{display:block;font-size:23px;margin-top:6px}.heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.heading h2{font-size:18px;margin:0}.timer{text-align:center;padding:12px 0 18px}.time{font-size:64px;font-weight:800;letter-spacing:2px}.presets{display:flex;justify-content:center;gap:8px;margin:14px 0}.presets button{padding:9px 12px}.presets .chosen{background:#dcece0;color:var(--deep)}.timer-controls{display:flex;justify-content:center;gap:10px}.people{display:flex;flex-direction:column;gap:12px}.person{display:flex;align-items:center;gap:12px;padding:12px;background:#f8faf7;border-radius:16px}.avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--blue);font-size:20px}.person .info{flex:1}.person small{color:var(--muted)}.dot{width:9px;height:9px;background:#7eb18c;border-radius:50%;display:inline-block;margin-right:6px}.progress{height:8px;background:#edf0eb;border-radius:99px;overflow:hidden;margin-top:8px}.progress div{height:100%;background:var(--deep);border-radius:99px}.feed{display:flex;flex-direction:column;gap:12px}.post{padding:14px;border:1px solid var(--border);border-radius:16px}.posthead{display:flex;align-items:center;gap:10px}.posthead .avatar{width:34px;height:34px}.post p{margin:10px 0}.post small{color:var(--muted)}.formrow{display:flex;gap:8px;margin:12px 0}.formrow input,.formrow textarea,input{border:1px solid var(--border);border-radius:12px;padding:11px;background:white;color:var(--ink)}.formrow input{flex:1;min-width:0}.full{width:100%}.goal{display:flex;align-items:center;gap:10px}.goal input{width:80px}.notice{font-size:12px;color:var(--muted);margin-top:14px}.hidden{display:none}.bottom{margin-top:18px}.empty{color:var(--muted);text-align:center;padding:22px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.wrap{padding:15px}.header{align-items:flex-start;flex-direction:column}.time{font-size:54px}.stats{grid-template-columns:1fr 1fr 1fr}.card{padding:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="header">
+<div class="brand"><div class="logo">📚</div>Study Together</div>
+<nav class="nav"><button class="active" data-tab="home">自習室</button><button data-tab="log">我的紀錄</button></nav>
+</header>
+<section class="hero">
+<h1>今天也一起努力吧。</h1>
+<div class="muted">不必獨自努力，這裡有人和你一起讀書。</div>
+<div class="stats">
+<div class="stat"><span class="muted">此刻自習中</span><strong id="online">12 人</strong></div>
+<div class="stat"><span class="muted">今日共同讀書</span><strong id="total">18 小時 42 分</strong></div>
+<div class="stat"><span class="muted">我的今日進度</span><strong id="myProgress">0 / 180 分</strong></div>
+</div>
+</section>
+<div id="home">
+<div class="grid">
+<div class="card">
+<div class="heading"><h2>專注計時器</h2><span class="muted">讓時間專注在當下</span></div>
+<div class="timer"><div class="time" id="clock">25:00</div>
+<div class="presets"><button class="secondary chosen" data-min="25">25 分</button><button class="secondary" data-min="50">50 分</button><button class="secondary" data-min="60">60 分</button><button class="secondary" data-min="90">90 分</button></div>
+<div class="timer-controls"><button id="start">開始讀書</button><button class="secondary" id="reset">重設</button></div>
+</div>
+<div class="goal"><span>今日目標</span><input id="goalInput" type="number" min="1" value="180"><span>分鐘</span><button class="secondary" id="setGoal">設定</button></div>
+<div class="notice">計時器運作時，請保持此頁面開啟。原型暫不支援跨裝置同步。</div>
+</div>
+<div class="card">
+<div class="heading"><h2>此刻一起讀書的人</h2><span class="muted">陪伴感 · 不排名</span></div>
+<div class="people" id="people"></div>
+</div>
+</div>
+<div class="grid bottom">
+<div class="card">
+<div class="heading"><h2>讀書回報</h2><span class="muted">記下今天的小進步</span></div>
+<div class="formrow"><input id="nickname" placeholder="你的暱稱" value="小讀者"></div>
+<div class="formrow"><input id="subject" placeholder="今天讀了什麼？例如：微積分第三章"></div>
+<div class="formrow"><input id="note" placeholder="完成了什麼 / 給自己的話"></div>
+<button class="full" id="postBtn">分享讀書回報</button>
+</div>
+<div class="card">
+<div class="heading"><h2>大家的讀書日常</h2></div>
+<div class="feed" id="feed"></div>
+</div>
+</div>
+</div>
+<div id="log" class="hidden">
+<div class="card">
+<div class="heading"><h2>我的讀書紀錄</h2></div>
+<div class="stats"><div class="stat"><span class="muted">今日累積</span><strong id="logMinutes">0 分鐘</strong></div><div class="stat"><span class="muted">今日目標</span><strong id="logGoal">180 分鐘</strong></div><div class="stat"><span class="muted">目標進度</span><strong id="logPercent">0%</strong></div></div>
+<div class="progress"><div id="logBar" style="width:0%"></div></div>
+<p class="muted" style="margin-top:20px">紀錄只保存在目前這個瀏覽器。清除瀏覽器資料可能會使紀錄消失。</p>
+</div>
+</div>
+</div>
+<script>
+const demoPeople=[["🦊","小狐狸","正在讀：英文單字"],["🐼","熊貓同學","正在讀：統計學"],["🌱","芽芽","正在讀：生物"],["🐈","貓咪讀者","正在讀：歷史"],["☁️","雲朵","正在讀：寫作"]];
+const initialPosts=[{name:"芽芽",emoji:"🌱",subject:"生物｜細胞章節",note:"完成了兩頁筆記整理，慢慢來也很好。",time:"剛剛"},{name:"熊貓同學",emoji:"🐼",subject:"統計學｜複習",note:"今天把上週的題目重新做了一遍。",time:"12 分鐘前"},{name:"小狐狸",emoji:"🦊",subject:"英文單字",note:"又記住了一些新單字，繼續努力。",time:"28 分鐘前"}];
+let seconds=1500, chosen=25, running=false, interval=null;
+let studyMinutes=Number(localStorage.studyMinutes||0), goal=Number(localStorage.studyGoal||180), posts=JSON.parse(localStorage.studyPosts||"null")||initialPosts;
+const clock=document.getElementById("clock");
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function renderPeople(){document.getElementById("people").innerHTML=demoPeople.map(p=>`<div class="person"><div class="avatar">${p[0]}</div><div class="info"><strong>${p[1]}</strong><br><small>${p[2]}</small></div><span><i class="dot"></i></span></div>`).join("")}
+function renderPosts(){document.getElementById("feed").innerHTML=posts.map(p=>`<div class="post"><div class="posthead"><div class="avatar">${p.emoji||"📖"}</div><div><strong>${escapeHtml(p.name)}</strong><br><small>${p.time||"剛剛"}</small></div></div><p><strong>${escapeHtml(p.subject)}</strong></p><p>${escapeHtml(p.note)}</p></div>`).join("")}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function updateStats(){document.getElementById("myProgress").textContent=`${studyMinutes} / ${goal} 分`;document.getElementById("logMinutes").textContent=studyMinutes+" 分鐘";document.getElementById("logGoal").textContent=goal+" 分鐘";let pct=Math.min(100,Math.round(studyMinutes/goal*100));document.getElementById("logPercent").textContent=pct+"%";document.getElementById("logBar").style.width=pct+"%";document.getElementById("goalInput").value=goal}
+function stopTimer(completed=false){running=false;clearInterval(interval);interval=null;document.getElementById("start").textContent="開始讀書";if(completed){studyMinutes+=chosen;localStorage.studyMinutes=studyMinutes;updateStats();alert("完成這段專注時間！讀書時間已記錄。")}}
+document.getElementById("start").onclick=()=>{if(running){stopTimer();return}running=true;document.getElementById("start").textContent="暫停";interval=setInterval(()=>{seconds--;clock.textContent=fmt(seconds);if(seconds<=0){stopTimer(true);seconds=chosen*60;clock.textContent=fmt(seconds)}},1000)};
+document.getElementById("reset").onclick=()=>{stopTimer();seconds=chosen*60;clock.textContent=fmt(seconds)};
+document.querySelectorAll("[data-min]").forEach(b=>b.onclick=()=>{if(running)return;document.querySelectorAll("[data-min]").forEach(x=>x.classList.remove("chosen"));b.classList.add("chosen");chosen=Number(b.dataset.min);seconds=chosen*60;clock.textContent=fmt(seconds)});
+document.getElementById("setGoal").onclick=()=>{let g=Math.max(1,Number(document.getElementById("goalInput").value)||180);goal=g;localStorage.studyGoal=goal;updateStats()};
+document.getElementById("postBtn").onclick=()=>{let name=document.getElementById("nickname").value.trim()||"匿名讀者",subject=document.getElementById("subject").value.trim(),note=document.getElementById("note").value.trim();if(!subject||!note){alert("請填寫讀書內容和回報。");return}posts.unshift({name,emoji:"📖",subject,note,time:"剛剛"});localStorage.studyPosts=JSON.stringify(posts);renderPosts();document.getElementById("subject").value="";document.getElementById("note").value=""};
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("home").classList.toggle("hidden",b.dataset.tab!=="home");document.getElementById("log").classList.toggle("hidden",b.dataset.tab!=="log")});
+renderPeople();renderPosts();updateStats();
+</script>
+</body>
+</html>
