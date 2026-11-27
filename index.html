@@ -129,11 +129,12 @@ input{border:1px solid var(--border);border-radius:12px;padding:11px;background:
 <div id="appPage" class="wrap hidden">
 <header class="header">
  <div class="brand"><div class="logo">📚</div>Study Together</div>
- <div class="nav">
+<div class="nav">
   <button class="active" data-tab="home">自習室</button>
   <button data-tab="log">我的紀錄</button>
+  <button data-tab="settings">設定</button>
   <button id="logoutBtn" class="secondary">登出</button>
- </div>
+</div>
 </header>
 
 <section class="hero">
@@ -220,6 +221,46 @@ input{border:1px solid var(--border);border-radius:12px;padding:11px;background:
   <div id="sessionList"></div>
  </div>
 </div>
+
+ 
+<!-- 設定頁面 -->
+<div id="settings" class="hidden">
+  <div class="card">
+    <div class="heading">
+      <h2>個人設定</h2>
+    </div>
+
+    <div class="sound-card">
+      <h3>計時結束提示音</h3>
+
+      <label>
+        <input type="checkbox" id="soundEnabled" checked>
+        開啟提示音
+      </label>
+
+      <label for="soundSelect">選擇提示音</label>
+      <select id="soundSelect">
+        <option value="sounds/音效1.mp3">音效 1</option>
+      </select>
+
+      <label for="soundVolume">提示音音量</label>
+      <input
+        type="range"
+        id="soundVolume"
+        min="0"
+        max="1"
+        step="0.05"
+        value="0.7"
+      >
+
+      <div class="timer-controls">
+        <button onclick="previewSound()">試聽</button>
+        <button class="secondary" onclick="stopPreview()">停止</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <script>
