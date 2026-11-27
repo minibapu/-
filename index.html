@@ -773,7 +773,7 @@ async function loadPosts(){
 
   // 讀取留言
   const {data:comments,error:commentError}=await db
-    .from("study_comment")
+    .from("study_comments")
     .select("*")
     .in("post_id",postIds)
     .order("created_at",{ascending:true});
@@ -978,7 +978,7 @@ async function submitComment(postId){
     return;
   }
 
-  const {error}=await db.from("study_comment").insert({
+  const {error}=await db.from("study_comments").insert({
     post_id:postId,
     user_id:currentUser.id,
     content
@@ -997,7 +997,7 @@ async function replyComment(commentId,postId){
 
   if(content===null || !content.trim()) return;
 
-  const {error}=await db.from("study_comment").insert({
+  const {error}=await db.from("study_comments").insert({
     post_id:postId,
     user_id:currentUser.id,
     content:content.trim(),
@@ -1015,7 +1015,7 @@ async function replyComment(commentId,postId){
 async function deleteComment(commentId){
   if(!confirm("確定要刪除這則留言嗎？")) return;
 
-  const {error}=await db.from("study_comment")
+  const {error}=await db.from("study_comments")
     .delete()
     .eq("id",commentId)
     .eq("user_id",currentUser.id);
