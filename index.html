@@ -1181,7 +1181,11 @@ function playTimerSound() {
 
 // 變更設定時自動儲存
 ["soundEnabled", "soundSelect", "soundVolume"].forEach(id => {
-  $(id).addEventListener("change", saveSoundSettings);
+  const element = $(id);
+
+  if (element) {
+    element.addEventListener("change", saveSoundSettings);
+  }
 });
  
 initialize();
