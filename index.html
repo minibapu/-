@@ -788,6 +788,7 @@ async function initialize(){
  }
 }
  
+
 // ===== 提示音設定 =====
 
 let previewAudio = null;
@@ -848,121 +849,10 @@ function playTimerSound() {
   });
 }
 
-function showSettings() {
-  $("settingsPage").style.display = "block";
-  loadSoundSettings();
-}
-
-function closeSettings() {
-  saveSoundSettings();
-  stopPreview();
-  $("settingsPage").style.display = "none";
-}
-// 載入設定
-function loadSoundSettings() {
-  const settings = getSoundSettings();
-
-  document.getElementById("soundEnabled").checked =
-    settings.enabled;
-
-  document.getElementById("soundSelect").value =
-    settings.file;
-
-  document.getElementById("soundVolume").value =
-    settings.volume;
-}
-
-// 儲存設定
-function saveSoundSettings() {
-  localStorage.setItem(
-    "soundEnabled",
-    document.getElementById("soundEnabled").checked
-  );
-
-  localStorage.setItem(
-    "soundFile",
-    document.getElementById("soundSelect").value
-  );
-
-  localStorage.setItem(
-    "soundVolume",
-    document.getElementById("soundVolume").value
-  );
-}
-
-// 試聽
-function previewSound() {
-  stopPreview();
-
-  const settings = getSoundSettings();
-
-  previewAudio = new Audio(settings.file);
-  previewAudio.volume = settings.volume;
-
-  previewAudio.play().catch(error => {
-    alert("音效播放失敗，請確認音檔是否存在。");
-    console.error(error);
-  });
-}
-
-// 停止試聽
-function stopPreview() {
-  if (previewAudio) {
-    previewAudio.pause();
-    previewAudio.currentTime = 0;
-    previewAudio = null;
-  }
-}
-
-// 計時結束播放
-function playTimerSound() {
-  const settings = getSoundSettings();
-
-  if (!settings.enabled) return;
-
-  const audio = new Audio(settings.file);
-  audio.volume = settings.volume;
-
-  audio.play().catch(error => {
-    console.error("提示音播放失敗：", error);
-  });
-}
-
-// 顯示設定頁
-function showSettings() {
-  document.getElementById("settingsPage").style.display = "block";
-  loadSoundSettings();
-}
-
-// 返回設定頁
-function closeSettings() {
-  saveSoundSettings();
-  stopPreview();
-
-  document.getElementById("settingsPage").style.display = "none";
-}
- 
-initialize();
-
 // 變更設定時自動儲存
-document.addEventListener("DOMContentLoaded", () => {
-  loadSoundSettings();
-
-  ["soundEnabled", "soundSelect", "soundVolume"].forEach(id => {
-    document.getElementById(id).addEventListener(
-      "change",
-      saveSoundSettings
-    );
-  });
+["soundEnabled", "soundSelect", "soundVolume"].forEach(id => {
+  $(id).addEventListener("change", saveSoundSettings);
 });
-
-</script>
- 
-
-</body>
-</html>
-
-
 <!-- 設定頁面入口 -->
 <button onclick="showSettings()">設定</button>
 
@@ -1006,4 +896,8 @@ document.addEventListener("DOMContentLoaded", () => {
   <br>
   <button onclick="closeSettings()">返回</button>
 </section>
-
+ 
+initialize();
+</script>
+</body>
+</html>
