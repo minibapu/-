@@ -76,6 +76,27 @@ input{border:1px solid var(--border);border-radius:12px;padding:11px;background:
 .settings{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .settings label{font-size:13px;color:var(--muted)}
 .settings input{margin-top:5px}
+ .sound-card{
+ background:#f8faf7;
+ border:1px solid var(--border);
+ border-radius:16px;
+ padding:18px;
+ margin:12px 0;
+}
+.sound-card select{
+ width:100%;
+ padding:11px;
+ border:1px solid var(--border);
+ border-radius:12px;
+ background:white;
+}
+.sound-card label{
+ display:block;
+ margin:12px 0;
+}
+.sound-card input[type="range"]{
+ width:100%;
+}
 @media(max-width:800px){
  .grid{grid-template-columns:1fr}
  .wrap{padding:15px}
