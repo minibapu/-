@@ -104,6 +104,63 @@ input{border:1px solid var(--border);border-radius:12px;padding:11px;background:
  .time{font-size:54px}
  .card{padding:18px}
 }
+ 
+.comments-area{
+  margin-top:16px;
+  border-top:1px solid var(--border);
+  padding-top:12px;
+}
+
+.comment{
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.comment-head{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.comment-head small{
+  opacity:.65;
+}
+
+.comment-content{
+  margin:8px 0;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.comment-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.comment-replies{
+  margin-top:12px;
+  margin-left:16px;
+  padding-left:12px;
+  border-left:2px solid var(--border);
+}
+
+.comment-input-row{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+
+.comment-input-row input{
+  flex:1;
+  min-width:0;
+}
+
+.comment-input-row button{
+  flex-shrink:0;
+}
+
 </style>
 </head>
 <body>
@@ -692,6 +749,7 @@ async function refreshCommunity(){
 }
 
 
+
 async function loadPosts(){
   const {data,error}=await db.from("study_posts")
     .select("*")
@@ -702,6 +760,172 @@ async function loadPosts(){
     console.error(error);
     return;
   }
+
+  const posts=data||[];
+
+  if(!posts.length){
+    $("feed").innerHTML='<div class="empty">還沒有人分享讀書日常。</div>';
+    return;
+  }
+
+  const postIds=posts.map(p=>p.id);
+  const userIds=[...new Set(posts.map(p=>p.user_id))];
+
+  // 讀取留言
+  const {data:comments,error:commentError}=await db
+    .from("study_comment")
+    .select("*")
+    .in("post_id",postIds)
+    .order("created_at",{ascending:true});
+
+  if(commentError) console.error(commentError);
+
+  const allComments=comments||[];
+
+  // 讀取留言者
+  allComments.forEach(c=>userIds.push(c.user_id));
+  const uniqueUserIds=[...new Set(userIds)];
+
+  const {data:profiles,error:profileError}=await db
+    .from("profiles")
+    .select("*")
+    .in("id",uniqueUserIds);
+
+  if(profileError) console.error(profileError);
+
+  const profileMap={};
+  (profiles||[]).forEach(p=>profileMap[p.id]=p);
+
+  // 讀取貼文愛心
+  const {data:likes,error:likesError}=await db
+    .from("study_likes")
+    .select("*")
+    .in("post_id",postIds);
+
+  if(likesError) console.error(likesError);
+
+  const likeMap={};
+  (likes||[]).forEach(l=>{
+    if(!likeMap[l.post_id]) likeMap[l.post_id]=[];
+    likeMap[l.post_id].push(l.user_id);
+  });
+
+  // 讀取留言愛心
+  const commentIds=allComments.map(c=>c.id);
+  let commentLikes=[];
+
+  if(commentIds.length){
+    const result=await db.from("comment_likes")
+      .select("*")
+      .in("comment_id",commentIds);
+
+    if(result.error) console.error(result.error);
+    commentLikes=result.data||[];
+  }
+
+  const commentLikeMap={};
+  commentLikes.forEach(l=>{
+    if(!commentLikeMap[l.comment_id])
+      commentLikeMap[l.comment_id]=[];
+
+    commentLikeMap[l.comment_id].push(l.user_id);
+  });
+
+  // 顯示留言
+  function renderComment(c){
+    const user=profileMap[c.user_id]||{};
+    const likes=commentLikeMap[c.id]||[];
+    const liked=likes.includes(currentUser.id);
+    const time=new Date(c.created_at).toLocaleString("zh-TW");
+
+    const replies=allComments.filter(x=>x.parent_comment_id===c.id);
+
+    return `
+      <div class="comment">
+        <div class="comment-head">
+          <strong>${escapeHtml(user.username||"讀者")}</strong>
+          <small>${time}</small>
+        </div>
+
+        <div class="comment-content">
+          ${escapeHtml(c.content)}
+        </div>
+
+        <div class="comment-actions">
+          <button class="secondary"
+            onclick="toggleCommentLike(${c.id})">
+            ${liked?"♥":"♡"} ${likes.length}
+          </button>
+
+          <button class="secondary"
+            onclick="replyComment(${c.id},${c.post_id})">
+            回覆
+          </button>
+
+          ${c.user_id===currentUser.id?
+            `<button class="secondary"
+              onclick="deleteComment(${c.id})">
+              刪除
+            </button>`:""}
+        </div>
+
+        ${replies.length?
+          `<div class="comment-replies">
+            ${replies.map(renderComment).join("")}
+          </div>`:""}
+      </div>
+    `;
+  }
+
+  $("feed").innerHTML=posts.map(p=>{
+    const user=profileMap[p.user_id]||{};
+    const time=new Date(p.created_at).toLocaleString("zh-TW");
+    const postLikes=likeMap[p.id]||[];
+    const liked=postLikes.includes(currentUser.id);
+
+    const postComments=allComments.filter(
+      c=>c.post_id===p.id && !c.parent_comment_id
+    );
+
+    return `
+      <div class="post">
+        <div class="posthead">
+          <div class="avatar">${avatarHTML(user.avatar_url)}</div>
+          <div>
+            <strong>${escapeHtml(user.username||"讀者")}</strong>
+            <br><small>${time}</small>
+          </div>
+        </div>
+
+        <p><strong>${escapeHtml(p.subject)}</strong></p>
+        <p>${escapeHtml(p.note)}</p>
+
+        <div class="post-actions">
+          <button class="secondary"
+            onclick="togglePostLike(${p.id})">
+            ${liked?"♥":"♡"} ${postLikes.length}
+          </button>
+        </div>
+
+        <div class="comments-area">
+          <div class="comments-list">
+            ${postComments.map(renderComment).join("")}
+          </div>
+
+          <div class="comment-input-row">
+            <input id="commentInput-${p.id}"
+              placeholder="寫下留言...">
+
+            <button onclick="submitComment(${p.id})">
+              留言
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 
   const posts=data||[];
 
@@ -809,6 +1033,104 @@ async function togglePostLike(postId){
 
   await loadPosts();
 }
+ 
+async function submitComment(postId){
+  const input=$(`commentInput-${postId}`);
+  const content=input.value.trim();
+
+  if(!content){
+    alert("請輸入留言。");
+    return;
+  }
+
+  const {error}=await db.from("study_comment").insert({
+    post_id:postId,
+    user_id:currentUser.id,
+    content
+  });
+
+  if(error){
+    alert("留言失敗："+error.message);
+    return;
+  }
+
+  await loadPosts();
+}
+
+async function replyComment(commentId,postId){
+  const content=prompt("請輸入回覆內容：");
+
+  if(content===null || !content.trim()) return;
+
+  const {error}=await db.from("study_comment").insert({
+    post_id:postId,
+    user_id:currentUser.id,
+    content:content.trim(),
+    parent_comment_id:commentId
+  });
+
+  if(error){
+    alert("回覆失敗："+error.message);
+    return;
+  }
+
+  await loadPosts();
+}
+
+async function deleteComment(commentId){
+  if(!confirm("確定要刪除這則留言嗎？")) return;
+
+  const {error}=await db.from("study_comment")
+    .delete()
+    .eq("id",commentId)
+    .eq("user_id",currentUser.id);
+
+  if(error){
+    alert("刪除失敗："+error.message);
+    return;
+  }
+
+  await loadPosts();
+}
+
+async function toggleCommentLike(commentId){
+  const {data:existing,error:findError}=await db
+    .from("comment_likes")
+    .select("id")
+    .eq("comment_id",commentId)
+    .eq("user_id",currentUser.id)
+    .maybeSingle();
+
+  if(findError){
+    alert("讀取留言愛心失敗："+findError.message);
+    return;
+  }
+
+  if(existing){
+    const {error}=await db.from("comment_likes")
+      .delete()
+      .eq("id",existing.id);
+
+    if(error){
+      alert("取消愛心失敗："+error.message);
+      return;
+    }
+  }else{
+    const {error}=await db.from("comment_likes")
+      .insert({
+        comment_id:commentId,
+        user_id:currentUser.id
+      });
+
+    if(error){
+      alert("新增愛心失敗："+error.message);
+      return;
+    }
+  }
+
+  await loadPosts();
+}
+
 
 $("postBtn").onclick=async()=>{
  const subject=$("subject").value.trim();
