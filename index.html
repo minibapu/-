@@ -927,72 +927,7 @@ async function loadPosts(){
 }
 
 
-  const posts=data||[];
-
-  if(!posts.length){
-    $("feed").innerHTML='<div class="empty">還沒有人分享讀書日常。</div>';
-    return;
-  }
-
-  const ids=[...new Set(posts.map(p=>p.user_id))];
-
-  const {data:profiles,error:profileError}=await db
-    .from("profiles")
-    .select("*")
-    .in("id",ids);
-
-  if(profileError) console.error(profileError);
-
-  const map={};
-  (profiles||[]).forEach(p=>map[p.id]=p);
-
-  // 讀取貼文愛心
-  const postIds=posts.map(p=>p.id);
-
-  const {data:likes,error:likesError}=await db
-    .from("study_likes")
-    .select("*")
-    .in("post_id",postIds);
-
-  if(likesError) console.error(likesError);
-
-  const likeMap={};
-  (likes||[]).forEach(l=>{
-    if(!likeMap[l.post_id]) likeMap[l.post_id]=[];
-    likeMap[l.post_id].push(l.user_id);
-  });
-
-  $("feed").innerHTML=posts.map(p=>{
-    const user=map[p.user_id]||{};
-    const time=new Date(p.created_at).toLocaleString("zh-TW");
-    const postLikes=likeMap[p.id]||[];
-    const liked=postLikes.includes(currentUser.id);
-
-    return `
-      <div class="post">
-        <div class="posthead">
-          <div class="avatar">${avatarHTML(user.avatar_url)}</div>
-          <div>
-            <strong>${escapeHtml(user.username||"讀者")}</strong>
-            <br><small>${time}</small>
-          </div>
-        </div>
-
-        <p><strong>${escapeHtml(p.subject)}</strong></p>
-        <p>${escapeHtml(p.note)}</p>
-
-        <div class="post-actions">
-          <button
-            class="secondary"
-            onclick="togglePostLike(${p.id})">
-            ${liked?"♥":"♡"} ${postLikes.length}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
+ 
 // 貼文愛心：按一下新增，再按一下取消
 async function togglePostLike(postId){
   const {data:existing,error:findError}=await db
