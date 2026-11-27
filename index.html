@@ -243,7 +243,10 @@ input{border:1px solid var(--border);border-radius:12px;padding:11px;background:
         <option value="sounds/音效1.mp3">音效 1</option>
       </select>
 
-      <label for="soundVolume">提示音音量</label>
+      <label for="soundVolume">提示音音
+       
+       
+       量</label>
       <input
         type="range"
         id="soundVolume"
@@ -853,49 +856,6 @@ function playTimerSound() {
 ["soundEnabled", "soundSelect", "soundVolume"].forEach(id => {
   $(id).addEventListener("change", saveSoundSettings);
 });
-<!-- 設定頁面入口 -->
-<button onclick="showSettings()">設定</button>
-
-<!-- 設定頁面 -->
-<section id="settingsPage" style="display:none; padding:20px;">
-  <h2>設定</h2>
-
-  <div class="setting-card">
-    <h3>計時結束提示音</h3>
-
-    <label>
-      <input type="checkbox" id="soundEnabled" checked>
-      開啟提示音
-    </label>
-
-    <br><br>
-
-    <label for="soundSelect">選擇提示音</label>
-    <select id="soundSelect">
-      <option value="sounds/音效1.mp3">音效 1</option>
-    </select>
-
-    <br><br>
-
-    <label for="soundVolume">提示音音量</label>
-    <input
-      type="range"
-      id="soundVolume"
-      min="0"
-      max="1"
-      step="0.05"
-      value="0.7"
-    >
-
-    <br><br>
-
-    <button onclick="previewSound()">試聽</button>
-    <button onclick="stopPreview()">停止試聽</button>
-  </div>
-
-  <br>
-  <button onclick="closeSettings()">返回</button>
-</section>
  
 initialize();
 </script>
