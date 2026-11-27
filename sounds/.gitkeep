@@ -1,1 +1,5 @@
-
+sounds/
+├── 音效1.mp3
+├── chime.mp3
+├── soft.mp3
+└── notification.mp3
