@@ -762,10 +762,21 @@ $("postBtn").onclick=async()=>{
 
 document.querySelectorAll("[data-tab]").forEach(btn=>{
  btn.onclick=()=>{
-  document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));
+  const tab = btn.dataset.tab;
+
+  document.querySelectorAll("[data-tab]").forEach(x=>{
+   x.classList.remove("active");
+  });
+
   btn.classList.add("active");
-  $("home").classList.toggle("hidden",btn.dataset.tab!=="home");
-  $("log").classList.toggle("hidden",btn.dataset.tab!=="log");
+
+  $("home").classList.toggle("hidden",tab!=="home");
+  $("log").classList.toggle("hidden",tab!=="log");
+  $("settings").classList.toggle("hidden",tab!=="settings");
+
+  if(tab==="settings"){
+   loadSoundSettings();
+  }
  };
 });
 
